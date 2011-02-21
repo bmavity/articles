@@ -12,11 +12,13 @@ socketServer.on('connection', function(client) {
   var sessionId = client.sessionId;
 
   client.on('message', function(message) {
-    client.broadcast(room.processMessage(sessionId, message));
+    var processedMessage = room.processMessage(sessionId, message);
+    client.broadcast(processedMessage);
   });
 
   client.on('disconnect', function() {
-    socketServer.broadcast(room.removeUser(sessionId));
+    var removedUserMessage = room.removeUser(sessionId);
+    socketServer.broadcast(removedUserMessage);
   });
 
   room.addUser(sessionId);
