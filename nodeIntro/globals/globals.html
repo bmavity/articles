@@ -1,20 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>Globals</title>
 </head>
-<head>
+<body>
 <h1>Demonstrates Globals</h1>
 <script src="external.js"></script>
 <script>
-  window.console = window.console || { log: window.alert };
+  // IE fix: define console.log to alert
+  window.console = window.console || {
+    log: window.alert
+  };
 
   var onThisPage = 'this page';
 
-  console.log(window.externalWithoutVar); // 'without var'
-  console.log(window.externalWithVar); // 'with var'
-  console.log(window.onThisPage); // 'this page'
-  console.log(onThisPage); // 'this page'
+  // 'without var'
+  console.log(window.externalWithoutVar);
+  // 'with var'
+  console.log(window.externalWithVar);
+  // 'this page'
+  console.log(window.onThisPage);
+  // 'this page'
+  console.log(onThisPage);
 </script>
-</head>
+</body>
 </html>
