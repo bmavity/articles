@@ -2,16 +2,22 @@ var clients = {},
     userCount = 1;
 
 var addUser = function(sessionId) {
-  clients[sessionId] = 'User ' + userCount;
+  var userName = 'User ' + userCount;
+  clients[sessionId] = userName;
   userCount++;
+  return {
+    messageType: 'system',
+	text: userName + ' has connected.'
+  };
 };
 
 var changeNick = function(sessionId, nickMessage) {
-  var originalNick = clients[sessionId];
-  clients[sessionId] = nickMessage.replace('/nick ', '');
+  var originalNick = clients[sessionId],
+      newNick = nickMessage.replace('/nick ', '');
+  clients[sessionId] = newNick;
   return {
-    nick: originalNick,
-    text: 'changed nick to ' + clients[sessionId]
+    messageType: 'system',
+    text: originalNick + ' changed nick to ' + newNick
   };
 };
 
@@ -20,6 +26,7 @@ var processMessage = function(sessionId, message) {
     return changeNick(sessionId, message);
   }
   return {
+    messageType: 'chat',
     nick: clients[sessionId],
     text: message
   };
@@ -29,8 +36,8 @@ var removeUser = function(sessionId) {
   var nick = clients[sessionId];
   delete clients[sessionId];
   return {
-    nick: nick,
-    text: 'was disconnected.'
+    messageType: 'system',
+    text: nick + ' was disconnected.'
   };
 };
 

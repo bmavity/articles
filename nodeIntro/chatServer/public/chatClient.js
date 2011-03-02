@@ -2,27 +2,56 @@
   var socket = new io.Socket('localhost'),
       $chatMessages = $('#chatMessages'),
       $form = $('form'),
-      $messageText = $('#messageText'),
-      $messageTemplate = $('<p class="message"><span class="nick"></span></p>');
+      $messageText = $('#messageText');
+  
+  var messageFactory = (function() {
+    var that = {},
+        $chatMessage = $('<p></p>').
+          addClass('chat message'),
+        $nick = $('<span></span>').
+          addClass('nick'),
+        $systemMessage = $('<p></p>').
+          addClass('system message');
+    
+    var chat = function(message) {
+      var $filledNick = $nick.clone().
+            text(message.nick + ':');
+      return $chatMessage.clone().
+        append($filledNick).
+        append(message.text);
+    };
+    
+    var system = function(message) {
+      return $systemMessage.clone().text(message.text);
+    };
+    
+    that.chat = chat;
+    that.system = system;
+    
+    return that;
+  })();
 
-  var createMessageDisplay = function(msg) {
-    var $messageDisplay = $messageTemplate.clone().append(msg.text);
-    $messageDisplay.find('.nick').text(msg.nick + ':');
-    return $messageDisplay;
-  };
-
-  socket.on('message', function(msg) {
-    $chatMessages.append(createMessageDisplay(msg));
+  socket.on('message', function(message) {
+    var handler = messageFactory[message.messageType];
+    $chatMessages.append(handler(message));
   });
 
   $form.submit(function() {
-    var msg = $messageText.val();
+    var message = $messageText.val(),
+        nick;
     $messageText.val('');
-    $chatMessages.append(createMessageDisplay({
-      nick: 'me',
-      text: msg
-    }));
-    socket.send(msg);
+    if(message.indexOf('/nick') === 0) {
+      nick = message.replace('/nick ', '');
+      $chatMessages.append(messageFactory.system({
+        text: 'You changed your nick to ' + nick + '.'
+      }));
+    } else {
+      $chatMessages.append(messageFactory.chat({
+        nick: 'me',
+        text: message
+      }));
+    }
+    socket.send(message);
     return false;
   });
 

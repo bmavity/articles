@@ -3,17 +3,18 @@ var connect = require('connect'),
     room = require('./chatRoom');
 
 var server = connect.createServer(
-  connect.staticProvider(__dirname + '/public')
+  connect.static(__dirname + '/public')
 );
 
 var socketServer = io.listen(server);
 
 socketServer.on('connection', function(client) {
-  var sessionId = client.sessionId;
+  var sessionId = client.sessionId,
+      addedUserMessage = room.addUser(sessionId);
 
   client.on('message', function(message) {
-    var processedMessage = room.processMessage(sessionId, message);
-    client.broadcast(processedMessage);
+    var procdMsg = room.processMessage(sessionId, message);
+    client.broadcast(procdMsg);
   });
 
   client.on('disconnect', function() {
@@ -21,7 +22,7 @@ socketServer.on('connection', function(client) {
     socketServer.broadcast(removedUserMessage);
   });
 
-  room.addUser(sessionId);
+  client.broadcast(addedUserMessage);
 });
 
 server.listen(8000);

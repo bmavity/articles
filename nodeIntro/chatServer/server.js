@@ -2,23 +2,24 @@ var connect = require('connect'),
     io = require('socket.io');
 
 var server = connect.createServer(
-  connect.staticProvider(__dirname + '/public')
+  connect.static(__dirname + '/public')
 );
 
-var socketServer = io.listen(server);
+var socketListener = io.listen(server);
 
-socketServer.on('connection', function(client) {
-  client.on('message', function(msg) {
+socketListener.on('connection', function(client) {
+  client.on('message', function(message) {
     client.broadcast({
+      messageType: 'chat',
       nick: client.sessionId,
-      text: msg
+      text: message
     });
   });
 
   client.on('disconnect', function() {
-    socketServer.broadcast({
-      nick: client.sessionId,
-      text: 'was disconnected.'
+    socketListener.broadcast({
+      messageType: 'system',
+      text: client.sessionId + ' was disconnected.'
     });
   });
 });
